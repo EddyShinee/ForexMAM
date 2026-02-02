@@ -1,0 +1,71 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "add": "Add",
+    "and": "and"
+  },
+  "auth": {
+    "loginTitle": "Login",
+    "registerTitle": "Register",
+    "email": "Email Address",
+    "password": "Password",
+    "confirmPassword": "Confirm Password",
+    "loginButton": "Log In to Dashboard",
+    "registerButton": "Create Account",
+    "logout": "Logout",
+    "emailPlaceholder": "name@example.com",
+    "passwordPlaceholder": "Enter your password",
+    "confirmPasswordPlaceholder": "Re-enter password",
+    "loginSuccess": "Login successful!",
+    "registerSuccess": "Registration successful!",
+    "checkEmail": "Please check your email to confirm your account.",
+    "logoutSuccess": "Logout successful!",
+    "welcomeBack": "Welcome Back",
+    "secureAccess": "Securely access your trading dashboard",
+    "createAccount": "Create New Account",
+    "startTrading": "Start managing your trades today",
+    "forgotPassword": "Forgot Password?",
+    "orContinueWith": "Or continue with",
+    "termsText": "By signing in, you agree to our",
+    "terms": "Terms of Service",
+    "privacy": "Privacy Policy"
+  },
+  "errors": {
+    "required": "This field is required",
+    "invalidEmail": "Invalid email",
+    "passwordMismatch": "Passwords do not match",
+    "passwordTooShort": "Password must be at least 6 characters",
+    "loginFailed": "Login failed. Please check your credentials.",
+    "registerFailed": "Registration failed. Please try again.",
+    "networkError": "Network error. Please try again."
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "todoList": "Todo List",
+    "addTodo": "Add Task",
+    "todoPlaceholder": "Enter a new task...",
+    "emptyTodos": "No tasks yet",
+    "emptyTodosDescription": "Start by adding your first task!",
+    "completedTasks": "tasks completed"
+  },
+  "todo": {
+    "addSuccess": "Task added!",
+    "updateSuccess": "Task updated!",
+    "deleteSuccess": "Task deleted!",
+    "addFailed": "Could not add task.",
+    "updateFailed": "Could not update task.",
+    "deleteFailed": "Could not delete task.",
+    "deleteConfirm": "Are you sure you want to delete?",
+    "markComplete": "Mark as complete",
+    "markIncomplete": "Mark as incomplete"
+  },
+  "notFound": {
+    "title": "Page Not Found",
+    "description": "The page you are looking for does not exist.",
+    "backHome": "Back to Home"
+  }
+}

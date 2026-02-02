@@ -1,0 +1,71 @@
+{
+  "common": {
+    "loading": "Đang tải...",
+    "save": "Lưu",
+    "cancel": "Hủy",
+    "delete": "Xóa",
+    "edit": "Sửa",
+    "add": "Thêm",
+    "and": "và"
+  },
+  "auth": {
+    "loginTitle": "Đăng nhập",
+    "registerTitle": "Đăng ký",
+    "email": "Địa chỉ Email",
+    "password": "Mật khẩu",
+    "confirmPassword": "Xác nhận mật khẩu",
+    "loginButton": "Đăng nhập",
+    "registerButton": "Tạo tài khoản",
+    "logout": "Đăng xuất",
+    "emailPlaceholder": "name@example.com",
+    "passwordPlaceholder": "Nhập mật khẩu của bạn",
+    "confirmPasswordPlaceholder": "Nhập lại mật khẩu",
+    "loginSuccess": "Đăng nhập thành công!",
+    "registerSuccess": "Đăng ký thành công!",
+    "checkEmail": "Vui lòng kiểm tra email để xác nhận tài khoản.",
+    "logoutSuccess": "Đăng xuất thành công!",
+    "welcomeBack": "Chào mừng trở lại",
+    "secureAccess": "Đăng nhập an toàn vào bảng điều khiển",
+    "createAccount": "Tạo tài khoản mới",
+    "startTrading": "Bắt đầu quản lý giao dịch của bạn",
+    "forgotPassword": "Quên mật khẩu?",
+    "orContinueWith": "Hoặc tiếp tục với",
+    "termsText": "Bằng việc đăng nhập, bạn đồng ý với",
+    "terms": "Điều khoản dịch vụ",
+    "privacy": "Chính sách bảo mật"
+  },
+  "errors": {
+    "required": "Trường này không được để trống",
+    "invalidEmail": "Email không hợp lệ",
+    "passwordMismatch": "Mật khẩu không khớp",
+    "passwordTooShort": "Mật khẩu phải có ít nhất 6 ký tự",
+    "loginFailed": "Đăng nhập thất bại. Vui lòng kiểm tra lại.",
+    "registerFailed": "Đăng ký thất bại. Vui lòng thử lại.",
+    "networkError": "Lỗi kết nối. Vui lòng thử lại."
+  },
+  "dashboard": {
+    "title": "Bảng điều khiển",
+    "todoList": "Danh sách công việc",
+    "addTodo": "Thêm công việc",
+    "todoPlaceholder": "Nhập công việc mới...",
+    "emptyTodos": "Chưa có công việc nào",
+    "emptyTodosDescription": "Bắt đầu bằng cách thêm công việc đầu tiên!",
+    "completedTasks": "công việc hoàn thành"
+  },
+  "todo": {
+    "addSuccess": "Đã thêm công việc mới!",
+    "updateSuccess": "Đã cập nhật công việc!",
+    "deleteSuccess": "Đã xóa công việc!",
+    "addFailed": "Không thể thêm công việc.",
+    "updateFailed": "Không thể cập nhật công việc.",
+    "deleteFailed": "Không thể xóa công việc.",
+    "deleteConfirm": "Bạn có chắc muốn xóa?",
+    "markComplete": "Đánh dấu hoàn thành",
+    "markIncomplete": "Đánh dấu chưa hoàn thành"
+  },
+  "notFound": {
+    "title": "Không tìm thấy trang",
+    "description": "Trang bạn tìm kiếm không tồn tại.",
+    "backHome": "Về trang chủ"
+  }
+}
