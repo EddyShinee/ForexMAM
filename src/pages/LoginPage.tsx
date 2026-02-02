@@ -1,5 +1,4 @@
 import { useState, useEffect, type FormEvent } from 'react'
-import { useNavigate, Navigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import toast from 'react-hot-toast'
 import { useAuth } from '../contexts/AuthContext'
@@ -7,7 +6,6 @@ import { AuthLayout } from '../components/layout/AuthLayout'
 
 export default function LoginPage() {
   const { t } = useTranslation()
-  const navigate = useNavigate()
   const { user, signIn } = useAuth()
 
   const [email, setEmail] = useState('')
