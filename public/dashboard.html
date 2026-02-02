@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Forex Multi-Account Dashboard</title>
+    <!-- Material Symbols -->
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <!-- Theme Config -->
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#2b8cee",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#101922",
+                        "surface-dark": "#192633", // Slightly lighter for cards/panels
+                        "success": "#22c55e",
+                        "danger": "#ef4444",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"],
+                        "mono": ["Roboto Mono", "monospace"], // For financial data
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Roboto+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+    <style>
+        /* Custom Scrollbar for Webkit */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #111a22;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #233648;
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #2b8cee;
+        }
+
+        .font-mono-numbers {
+            font-variant-numeric: tabular-nums;
+            font-family: 'Roboto Mono', monospace;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-white font-display overflow-hidden h-screen flex">
+<!--
+    LƯU Ý:
+    - Trang dashboard này đang dùng TOÀN BỘ SỐ LIỆU DUMMY.
+    - Khi có API / dữ liệu thật, hãy thay thế các giá trị tĩnh (equity, balance, trades, user name, ...) bằng dữ liệu động phía backend / JS.
+-->
+
+<!-- Sidebar module dưới dạng template, có thể nhúng / bật tắt bằng JS -->
+<template id="sidebar-template">
+    <aside class="w-64 bg-surface-dark border-r border-slate-700/30 flex flex-col flex-shrink-0 h-full z-20">
+        <div class="p-6 flex flex-col gap-1">
+            <h1 class="text-white text-xl font-bold leading-normal flex items-center gap-2">
+                <span class="material-symbols-outlined text-primary">candlestick_chart</span>
+                FX Command
+            </h1>
+            <p class="text-slate-400 text-xs font-normal pl-8">Multi-Account Manager</p>
+        </div>
+        <nav class="flex flex-col gap-2 px-4 py-2 flex-1">
+            <!-- Active State -->
+            <a class="flex items-center gap-3 px-3 py-3 rounded-lg bg-primary text-white shadow-lg shadow-primary/20 transition-all hover:brightness-110" href="#">
+                <span class="material-symbols-outlined filled">dashboard</span>
+                <span class="text-sm font-medium">Dashboard</span>
+            </a>
+            <a class="flex items-center gap-3 px-3 py-3 rounded-lg text-slate-400 hover:bg-slate-700/30 hover:text-white transition-colors" href="#">
+                <span class="material-symbols-outlined">account_balance_wallet</span>
+                <span class="text-sm font-medium">Accounts</span>
+            </a>
+            <a class="flex items-center gap-3 px-3 py-3 rounded-lg text-slate-400 hover:bg-slate-700/30 hover:text-white transition-colors" href="#">
+                <span class="material-symbols-outlined">show_chart</span>
+                <span class="text-sm font-medium">Trading</span>
+            </a>
+            <a class="flex items-center gap-3 px-3 py-3 rounded-lg text-slate-400 hover:bg-slate-700/30 hover:text-white transition-colors" href="#">
+                <span class="material-symbols-outlined">analytics</span>
+                <span class="text-sm font-medium">Statistics</span>
+            </a>
+            <div class="h-px bg-slate-700/50 my-2"></div>
+            <a class="flex items-center gap-3 px-3 py-3 rounded-lg text-slate-400 hover:bg-slate-700/30 hover:text-white transition-colors" href="#">
+                <span class="material-symbols-outlined">settings</span>
+                <span class="text-sm font-medium">Settings</span>
+            </a>
+        </nav>
+        <div class="p-4 border-t border-slate-700/30 mt-auto">
+            <div class="relative">
+                <button
+                    id="account-info-button"
+                    class="w-full flex items-center justify-between gap-3 px-2 py-1.5 rounded-md hover:bg-slate-800/80 transition-colors"
+                    type="button"
+                >
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center text-xs font-bold bg-cover bg-center"
+                             data-alt="User profile picture"
+                             style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCsW7nc8FjO4b2uDLNfJf1HZ8d6ciYb-qcDW3tLgR2ZWw0gbkWEB4eDj3QrFMgNaX8DqGRa0mP9FGWKHZOPIJMbDGxgMVOKk3TXJpSXp_yHkNOeAyAWkwMR_PZlQyMZZyhj7lKabZUel5ULHImlJaDn09EcSgwjsP-382NVXeTtBgyqkdRNEPPdaOLuKVXkppx1XS55JM78dQ5MuLVQwKxSKMgz3bcNtRkRDf9__H4hEW54jYfO1dcppJjGIBwmUCD4jpd7FIGzsAI');"></div>
+                        <div class="flex flex-col items-start">
+                            <!-- Sẽ được thay bằng thông tin account từ Supabase -->
+                            <span id="account-user-name" class="text-sm font-medium text-white">Loading...</span>
+                            <span id="account-user-plan" class="text-xs text-slate-400">Loading plan...</span>
+                        </div>
+                    </div>
+                    <span class="material-symbols-outlined text-slate-400 text-[18px]">expand_more</span>
+                </button>
+
+                <!-- Popup menu đăng xuất -->
+                <div
+                    id="account-menu"
+                    class="absolute bottom-12 right-0 w-40 bg-surface-dark border border-slate-700/80 rounded-lg shadow-lg py-1 hidden"
+                >
+                    <button
+                        id="account-logout-item"
+                        type="button"
+                        class="w-full flex items-center gap-2 px-3 py-2 text-xs text-slate-200 hover:bg-slate-700/80 transition-colors"
+                    >
+                        <span class="material-symbols-outlined text-[16px]">logout</span>
+                        Đăng xuất
+                    </button>
+                </div>
+            </div>
+        </div>
+    </aside>
+</template>
+
+<!-- Nơi sidebar sẽ được render vào, có thể bật/tắt tuỳ ý -->
+<div id="sidebar-root" class="h-full"></div>
+
+<!-- Main Content Area -->
+<main class="flex-1 flex flex-col min-w-0 overflow-hidden relative">
+    <!-- Top Stats Bar -->
+    <header class="bg-surface-dark/50 backdrop-blur-md border-b border-slate-700/30 p-4 sticky top-0 z-10">
+        <div class="flex flex-wrap gap-4 items-center justify-between">
+            <!-- Left: Sidebar toggle + Market Status -->
+            <div class="flex items-center gap-4">
+                <button
+                    id="sidebar-toggle-btn"
+                    type="button"
+                    class="inline-flex items-center justify-center w-8 h-8 rounded-md border border-slate-700/60 text-slate-300 hover:bg-slate-800 hover:text-white transition-colors"
+                    title="Toggle sidebar"
+                >
+                    <span class="material-symbols-outlined text-[18px]">menu_open</span>
+                </button>
+                <div class="flex flex-col">
+                    <span class="text-xs text-slate-400 font-medium uppercase tracking-wider">Market Status</span>
+                    <div class="flex items-center gap-2">
+                        <span class="relative flex h-2.5 w-2.5">
+                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-success opacity-75"></span>
+                            <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-success"></span>
+                        </span>
+                        <span class="text-white font-bold text-sm">OPEN (London)</span>
+                    </div>
+                </div>
+                <div class="h-8 w-px bg-slate-700/50 mx-2"></div>
+                <div class="flex flex-col">
+                    <span class="text-xs text-slate-400 font-medium uppercase tracking-wider">Server Time (UTC)</span>
+                    <!-- TODO: Bind real-time server time -->
+                    <span class="text-white font-mono-numbers font-medium text-sm">09:42:15</span>
+                </div>
+            </div>
+            <!-- Right: Global Equity Widget + Quick Config toggle -->
+            <div class="flex items-center gap-3">
+                <button
+                    id="quickconfig-toggle-btn"
+                    type="button"
+                    class="inline-flex items-center justify-center w-8 h-8 rounded-md border border-slate-700/60 text-slate-300 hover:bg-slate-800 hover:text-white transition-colors"
+                    title="Toggle Quick Config"
+                >
+                    <span class="material-symbols-outlined text-[18px]">tune</span>
+                </button>
+                <div class="flex gap-6 items-center bg-slate-800/50 px-4 py-2 rounded-lg border border-slate-700/30">
+                    <div class="flex flex-col items-end">
+                        <span class="text-xs text-slate-400 font-medium uppercase">Total Equity</span>
+                        <span class="text-white text-lg font-bold font-mono-numbers">$145,230.50</span>
+                    </div>
+                    <div class="flex flex-col items-end">
+                        <span class="text-xs text-slate-400 font-medium uppercase">Daily P/L</span>
+                        <div class="flex items-center gap-1 text-success">
+                            <span class="material-symbols-outlined text-[16px]">trending_up</span>
+                            <span class="font-bold font-mono-numbers text-sm">+$3,240.00 (+2.4%)</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Scrollable Content -->
+    <div class="flex-1 overflow-y-auto p-6 scroll-smooth">
+        <!-- Section: Account Overview -->
+        <section class="mb-8">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-white text-lg font-bold">Multi-Account Overview</h2>
+                <button id="view-all-accounts-btn" class="text-primary text-sm font-medium hover:text-primary/80 flex items-center gap-1">
+                    View All <span class="material-symbols-outlined text-sm">arrow_forward</span>
+                </button>
+            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-2 gap-4">
+                <!-- Account Card 1 (DUMMY) -->
+                <div class="bg-surface-dark rounded-xl p-5 border border-slate-700/30 shadow-sm hover:border-primary/50 transition-colors group">
+                    <div class="flex justify-between items-start mb-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded bg-white flex items-center justify-center overflow-hidden">
+                                <!-- Placeholder for Broker Logo -->
+                                <span class="text-black font-bold text-xs">OANDA</span>
+                            </div>
+                            <div>
+                                <h3 class="text-white font-bold group-hover:text-primary transition-colors">Main Aggressive</h3>
+                                <p class="text-slate-400 text-xs">Oanda - 9382910</p>
+                            </div>
+                        </div>
+                        <span class="px-2 py-1 rounded bg-success/10 text-success text-xs font-bold border border-success/20">Active</span>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <p class="text-slate-500 text-xs mb-1">Equity</p>
+                            <p class="text-white text-xl font-bold font-mono-numbers">$52,420.00</p>
+                        </div>
+                        <div>
+                            <p class="text-slate-500 text-xs mb-1">Balance</p>
+                            <p class="text-slate-300 text-lg font-medium font-mono-numbers">$51,180.00</p>
+                        </div>
+                    </div>
+                    <div class="space-y-2">
+                        <div class="flex justify-between text-xs">
+                            <span class="text-slate-400">Margin Level</span>
+                            <span class="text-white font-mono-numbers">250%</span>
+                        </div>
+                        <div class="h-2 w-full bg-slate-700 rounded-full overflow-hidden">
+                            <div class="h-full bg-primary w-[60%] rounded-full"></div>
+                        </div>
+                        <div class="flex justify-between text-xs pt-1">
+                            <span class="text-slate-500">Free: <span class="text-slate-300 font-mono-numbers">$21,200</span></span>
+                            <span class="text-slate-500">Used: <span class="text-slate-300 font-mono-numbers">$31,220</span></span>
+                        </div>
+                    </div>
+                    <div class="mt-4 pt-4 border-t border-slate-700/30 flex justify-end gap-2">
+                        <button
+                            class="px-3 py-1.5 rounded bg-slate-700 hover:bg-slate-600 text-white text-xs font-medium transition-colors"
+                            type="button"
+                            data-account-id="oanda-9382910"
+                            data-action="account-history"
+                        >
+                            History
+                        </button>
+                        <button
+                            class="px-3 py-1.5 rounded bg-primary hover:bg-primary/90 text-white text-xs font-medium transition-colors"
+                            type="button"
+                            data-account-id="oanda-9382910"
+                            data-action="account-manage"
+                        >
+                            Manage
+                        </button>
+                    </div>
+                </div>
+                <!-- Account Card 2 (DUMMY) -->
+                <div class="bg-surface-dark rounded-xl p-5 border border-slate-700/30 shadow-sm hover:border-primary/50 transition-colors group">
+                    <div class="flex justify-between items-start mb-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded bg-white flex items-center justify-center overflow-hidden">
+                                <span class="text-black font-bold text-xs">IC</span>
+                            </div>
+                            <div>
+                                <h3 class="text-white font-bold group-hover:text-primary transition-colors">Swing Fund</h3>
+                                <p class="text-slate-400 text-xs">IC Markets - 110255</p>
+                            </div>
+                        </div>
+                        <span class="px-2 py-1 rounded bg-success/10 text-success text-xs font-bold border border-success/20">Active</span>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <p class="text-slate-500 text-xs mb-1">Equity</p>
+                            <p class="text-white text-xl font-bold font-mono-numbers">$93,230.50</p>
+                        </div>
+                        <div>
+                            <p class="text-slate-500 text-xs mb-1">Balance</p>
+                            <p class="text-slate-300 text-lg font-medium font-mono-numbers">$90,100.00</p>
+                        </div>
+                    </div>
+                    <div class="space-y-2">
+                        <div class="flex justify-between text-xs">
+                            <span class="text-slate-400">Margin Level</span>
+                            <span class="text-white font-mono-numbers">500%</span>
+                        </div>
+                        <div class="h-2 w-full bg-slate-700 rounded-full overflow-hidden">
+                            <div class="h-full bg-success w-[30%] rounded-full"></div>
+                        </div>
+                        <div class="flex justify-between text-xs pt-1">
+                            <span class="text-slate-500">Free: <span class="text-slate-300 font-mono-numbers">$60,100</span></span>
+                            <span class="text-slate-500">Used: <span class="text-slate-300 font-mono-numbers">$33,130</span></span>
+                        </div>
+                    </div>
+                    <div class="mt-4 pt-4 border-t border-slate-700/30 flex justify-end gap-2">
+                        <button
+                            class="px-3 py-1.5 rounded bg-slate-700 hover:bg-slate-600 text-white text-xs font-medium transition-colors"
+                            type="button"
+                            data-account-id="ic-110255"
+                            data-action="account-history"
+                        >
+                            History
+                        </button>
+                        <button
+                            class="px-3 py-1.5 rounded bg-primary hover:bg-primary/90 text-white text-xs font-medium transition-colors"
+                            type="button"
+                            data-account-id="ic-110255"
+                            data-action="account-manage"
+                        >
+                            Manage
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section: Active Trades (DUMMY) -->
+        <section class="flex-1 flex flex-col min-h-[400px]">
+            <div class="flex justify-between items-end mb-4">
+                <div>
+                    <h2 class="text-white text-lg font-bold">Active Trades</h2>
+                    <p class="text-slate-400 text-sm">Real-time positions across all accounts</p>
+                </div>
+                <div class="flex gap-2">
+                    <button id="filter-trades-btn" class="flex items-center gap-1 px-3 py-1.5 rounded border border-slate-600 text-slate-300 hover:bg-slate-700 text-xs font-medium" type="button">
+                        <span class="material-symbols-outlined text-[16px]">filter_list</span> Filter
+                    </button>
+                    <button id="close-all-trades-btn" class="flex items-center gap-1 px-3 py-1.5 rounded bg-danger/10 text-danger border border-danger/20 hover:bg-danger/20 text-xs font-medium" type="button">
+                        Close All
+                    </button>
+                </div>
+            </div>
+            <div class="bg-surface-dark rounded-xl border border-slate-700/30 overflow-hidden flex flex-col shadow-lg">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm whitespace-nowrap">
+                        <thead class="bg-slate-800/50 text-slate-400 uppercase text-xs font-semibold">
+                        <tr>
+                            <th class="px-6 py-3">Symbol</th>
+                            <th class="px-6 py-3">Type</th>
+                            <th class="px-6 py-3 text-right">Volume</th>
+                            <th class="px-6 py-3 text-right">Entry</th>
+                            <th class="px-6 py-3 text-right">Current</th>
+                            <th class="px-6 py-3 text-right">S/L</th>
+                            <th class="px-6 py-3 text-right">T/P</th>
+                            <th class="px-6 py-3 text-right">Profit</th>
+                            <th class="px-6 py-3 text-center">Actions</th>
+                        </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-700/30 text-slate-200">
+                        <!-- Row 1 -->
+                        <tr class="hover:bg-slate-700/20 transition-colors" data-trade-id="trade-1">
+                            <td class="px-6 py-3 font-medium">
+                                <div class="flex items-center gap-2">
+                                    <span class="w-1 h-4 bg-primary rounded-full"></span>
+                                    EUR/USD
+                                    <span class="px-1.5 py-0.5 bg-slate-700 rounded text-[10px] text-slate-400">Oanda-9382</span>
+                                </div>
+                            </td>
+                            <td class="px-6 py-3"><span class="text-success font-bold">BUY</span></td>
+                            <td class="px-6 py-3 text-right font-mono-numbers">1.50</td>
+                            <td class="px-6 py-3 text-right font-mono-numbers text-slate-400">1.08450</td>
+                            <td class="px-6 py-3 text-right font-mono-numbers font-medium">1.08750</td>
+                            <td class="px-6 py-3 text-right font-mono-numbers text-danger">1.08200</td>
+                            <td class="px-6 py-3 text-right font-mono-numbers text-success">1.09100</td>
+                            <td class="px-6 py-3 text-right font-mono-numbers font-bold text-success bg-success/5">+$450.00</td>
+                            <td class="px-6 py-3">
+                                <div class="flex items-center justify-center gap-2">
+                                    <button class="text-slate-400 hover:text-primary transition-colors p-1" title="Edit" type="button" data-action="edit-trade">
+                                        <span class="material-symbols-outlined text-[18px]">edit</span>
+                                    </button>
+                                    <button class="text-slate-400 hover:text-danger transition-colors p-1" title="Close" type="button" data-action="close-trade">
+                                        <span class="material-symbols-outlined text-[18px]">close</span>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        <!-- Row 2 -->
+                        <tr class="hover:bg-slate-700/20 transition-colors" data-trade-id="trade-2">
+                            <td class="px-6 py-3 font-medium">
+                                <div class="flex items-center gap-2">
+                                    <span class="w-1 h-4 bg-purple-500 rounded-full"></span>
+                                    GBP/JPY
+                                    <span class="px-1.5 py-0.5 bg-slate-700 rounded text-[10px] text-slate-400">IC-1102</span>
+                                </div>
+                            </td>
+                            <td class="px-6 py-3"><span class="text-danger font-bold">SELL</span></td>
+                            <td class="px-6 py-3 text-right font-mono-numbers">0.50</td>
+                            <td class="px-6 py-3 text-right font-mono-numbers text-slate-400">182.400</td>
+                            <td class="px-6 py-3 text-right font-mono-numbers font-medium">182.600</td>
+                            <td class="px-6 py-3 text-right font-mono-numbers text-danger">183.000</td>
+                            <td class="px-6 py-3 text-right font-mono-numbers text-success">181.500</td>
+                            <td class="px-6 py-3 text-right font-mono-numbers font-bold text-danger bg-danger/5">-$120.00</td>
+                            <td class="px-6 py-3">
+                                <div class="flex items-center justify-center gap-2">
+                                    <button class="text-slate-400 hover:text-primary transition-colors p-1" title="Edit" type="button" data-action="edit-trade">
+                                        <span class="material-symbols-outlined text-[18px]">edit</span>
+                                    </button>
+                                    <button class="text-slate-400 hover:text-danger transition-colors p-1" title="Close" type="button" data-action="close-trade">
+                                        <span class="material-symbols-outlined text-[18px]">close</span>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        <!-- Row 3 -->
+                        <tr class="hover:bg-slate-700/20 transition-colors" data-trade-id="trade-3">
+                            <td class="px-6 py-3 font-medium">
+                                <div class="flex items-center gap-2">
+                                    <span class="w-1 h-4 bg-primary rounded-full"></span>
+                                    XAU/USD
+                                    <span class="px-1.5 py-0.5 bg-slate-700 rounded text-[10px] text-slate-400">Oanda-9382</span>
+                                </div>
+                            </td>
+                            <td class="px-6 py-3"><span class="text-success font-bold">BUY</span></td>
+                            <td class="px-6 py-3 text-right font-mono-numbers">0.10</td>
+                            <td class="px-6 py-3 text-right font-mono-numbers text-slate-400">1950.50</td>
+                            <td class="px-6 py-3 text-right font-mono-numbers font-medium">1952.10</td>
+                            <td class="px-6 py-3 text-right font-mono-numbers text-danger">1945.00</td>
+                            <td class="px-6 py-3 text-right font-mono-numbers text-success">1965.00</td>
+                            <td class="px-6 py-3 text-right font-mono-numbers font-bold text-success bg-success/5">+$16.00</td>
+                            <td class="px-6 py-3">
+                                <div class="flex items-center justify-center gap-2">
+                                    <button class="text-slate-400 hover:text-primary transition-colors p-1" title="Edit" type="button" data-action="edit-trade">
+                                        <span class="material-symbols-outlined text-[18px]">edit</span>
+                                    </button>
+                                    <button class="text-slate-400 hover:text-danger transition-colors p-1" title="Close" type="button" data-action="close-trade">
+                                        <span class="material-symbols-outlined text-[18px]">close</span>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+    </div>
+</main>
+
+<!-- Right Panel: Quick Config module -->
+<template id="quickconfig-template">
+    <aside class="w-[300px] bg-surface-dark border-l border-slate-700/30 hidden xl:flex flex-col flex-shrink-0 h-full z-20">
+        <div class="p-4 border-b border-slate-700/30">
+            <h2 class="text-white font-bold text-base flex items-center gap-2">
+                <span class="material-symbols-outlined text-slate-400">tune</span>
+                Quick Config
+            </h2>
+        </div>
+        <div class="p-4 flex flex-col gap-6 overflow-y-auto flex-1">
+            <!-- Risk Panel -->
+            <div class="flex flex-col gap-3">
+                <label class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Trading Defaults</label>
+                <div class="flex flex-col gap-2">
+                    <label class="text-sm text-slate-300">Default Lot Size</label>
+                    <div class="flex items-center rounded-lg bg-background-dark border border-slate-600/50 p-1">
+                        <button class="w-8 h-8 flex items-center justify-center hover:bg-slate-700 rounded text-slate-400">
+                            <span class="material-symbols-outlined text-sm">remove</span>
+                        </button>
+                        <input class="bg-transparent border-none text-center w-full text-white font-mono-numbers focus:ring-0" type="text" value="0.10"/>
+                        <button class="w-8 h-8 flex items-center justify-center hover:bg-slate-700 rounded text-slate-400">
+                            <span class="material-symbols-outlined text-sm">add</span>
+                        </button>
+                    </div>
+                </div>
+                <div class="flex flex-col gap-2">
+                    <label class="text-sm text-slate-300">Risk % Per Trade</label>
+                    <div class="relative">
+                        <input class="w-full bg-background-dark border border-slate-600/50 rounded-lg py-2 px-3 text-white font-mono-numbers focus:ring-1 focus:ring-primary focus:border-primary" type="number" value="1.0"/>
+                        <span class="absolute right-3 top-2 text-slate-500 font-mono-numbers">%</span>
+                    </div>
+                </div>
+            </div>
+            <div class="h-px bg-slate-700/50"></div>
+            <!-- Toggles -->
+            <div class="flex flex-col gap-4">
+                <label class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Execution</label>
+                <div class="flex items-center justify-between">
+                    <span class="text-sm text-slate-300">One-Click Trading</span>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input checked class="sr-only peer" type="checkbox" value=""/>
+                        <div class="w-11 h-6 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white
+                            after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border
+                            after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+                    </label>
+                </div>
+                <div class="flex items-center justify-between">
+                    <span class="text-sm text-slate-300">Auto Breakeven</span>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input class="sr-only peer" type="checkbox" value=""/>
+                        <div class="w-11 h-6 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white
+                            after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border
+                            after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+                    </label>
+                </div>
+            </div>
+            <div class="h-px bg-slate-700/50"></div>
+            <!-- Notifications -->
+            <div class="bg-blue-500/10 border border-blue-500/20 rounded-lg p-3">
+                <div class="flex items-start gap-3">
+                    <span class="material-symbols-outlined text-primary text-xl mt-0.5">info</span>
+                    <div>
+                        <p class="text-sm font-medium text-white">System Notice</p>
+                        <p class="text-xs text-slate-400 mt-1">NFP News Release in 30 minutes. High volatility expected.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="p-4 border-t border-slate-700/30">
+            <button class="w-full py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg text-sm font-medium transition-colors">
+                Reset to Default
+            </button>
+        </div>
+    </aside>
+</template>
+
+<div id="quickconfig-root" class="hidden xl:flex h-full flex-shrink-0"></div>
+
+<!-- Supabase Auth: Lấy thông tin account và hiển thị ở sidebar -->
+<!-- Dùng file UMD cho browser, expose global "supabase" -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script>
+    // CHÚ Ý:
+    // - Đây là anon key PUBLIC của Supabase, an toàn để dùng phía client.
+    // - Nếu bạn thay đổi project Supabase, hãy cập nhật lại 2 biến URL / KEY này.
+    const SUPABASE_URL = 'https://efqgzkqczkwrmnxcaxhv.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_Gj935UJjV2_NGtikRRyqXQ_7njXMQY5';
+
+    // Đảm bảo Supabase JS đã được load từ CDN
+    if (!window.supabase) {
+        console.error('Supabase JS chưa được load. Kiểm tra thẻ <script> CDN hoặc kết nối mạng.');
+    }
+
+    // Đặt tên khác để không đụng biến global "supabase" từ UMD
+    const supabaseClient = window.supabase
+        ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+        : null;
+
+    function initSidebar() {
+        const root = document.getElementById('sidebar-root');
+        const tpl = document.getElementById('sidebar-template');
+        if (!root || !tpl) return;
+
+        const enabled = window.SIDEBAR_ENABLED !== false;
+
+        if (enabled) {
+            const clone = tpl.content.cloneNode(true);
+            root.innerHTML = '';
+            root.appendChild(clone);
+            root.classList.remove('hidden');
+            root.classList.add('flex');
+        } else {
+            root.innerHTML = '';
+            root.classList.remove('flex');
+            root.classList.add('hidden');
+        }
+    }
+
+    function initQuickConfig() {
+        const root = document.getElementById('quickconfig-root');
+        const tpl = document.getElementById('quickconfig-template');
+        if (!root || !tpl) return;
+
+        const enabled = window.QUICKCONFIG_ENABLED !== false;
+
+        if (enabled) {
+            const clone = tpl.content.cloneNode(true);
+            root.innerHTML = '';
+            root.appendChild(clone);
+            root.classList.remove('hidden');
+        } else {
+            root.innerHTML = '';
+            root.classList.add('hidden');
+        }
+    }
+
+    async function loadAccountInfo() {
+        const nameEl = document.getElementById('account-user-name');
+        const planEl = document.getElementById('account-user-plan');
+
+        if (!supabaseClient) return;
+
+        try {
+            const { data, error } = await supabaseClient.auth.getUser();
+
+            if (error || !data || !data.user) {
+                // Không có session -> user chưa đăng nhập
+                if (nameEl) nameEl.textContent = 'Guest';
+                if (planEl) planEl.textContent = 'Not logged in';
+
+                // Nếu muốn, bạn có thể redirect về trang login:
+                // window.location.href = '/';
+                return;
+            }
+
+            const user = data.user;
+
+            // Lấy tên ưu tiên từ metadata, fallback về email
+            const displayName =
+                (user.user_metadata && (user.user_metadata.full_name || user.user_metadata.name)) ||
+                user.email ||
+                'Trader';
+
+            // Lấy plan từ metadata nếu có, fallback mặc định
+            const plan =
+                (user.user_metadata && (user.user_metadata.plan || user.user_metadata.account_type)) ||
+                'Pro Plan';
+
+            if (nameEl) nameEl.textContent = displayName;
+            if (planEl) planEl.textContent = plan;
+        } catch (e) {
+            console.error('Error loading account info from Supabase:', e);
+            if (nameEl) nameEl.textContent = 'Trader';
+            if (planEl) planEl.textContent = 'Pro Plan';
+        }
+    }
+
+    function setupAccountMenu() {
+        const accountBtn = document.getElementById('account-info-button');
+        const menu = document.getElementById('account-menu');
+        const logoutItem = document.getElementById('account-logout-item');
+
+        if (!accountBtn || !menu || !logoutItem) return;
+
+        const closeMenu = () => menu.classList.add('hidden');
+
+        accountBtn.addEventListener('click', (event) => {
+            event.stopPropagation();
+            menu.classList.toggle('hidden');
+        });
+
+        logoutItem.addEventListener('click', async (event) => {
+            event.stopPropagation();
+            try {
+                if (supabaseClient) {
+                    await supabaseClient.auth.signOut();
+                }
+                window.location.href = '/';
+            } catch (e) {
+                console.error('Error during logout:', e);
+            }
+        });
+
+        document.addEventListener('click', () => {
+            if (!menu.classList.contains('hidden')) {
+                closeMenu();
+            }
+        });
+    }
+
+    function setupTradeAndAccountActions() {
+        // View all accounts (hiện tại chỉ demo)
+        const viewAllBtn = document.getElementById('view-all-accounts-btn');
+        if (viewAllBtn) {
+            viewAllBtn.addEventListener('click', () => {
+                alert('TODO: Điều hướng tới trang danh sách toàn bộ tài khoản.');
+            });
+        }
+
+        // Account actions (History / Manage)
+        document.querySelectorAll('[data-action="account-history"]').forEach((btn) => {
+            btn.addEventListener('click', () => {
+                const accountId = btn.getAttribute('data-account-id');
+                alert('TODO: Mở lịch sử tài khoản: ' + accountId);
+            });
+        });
+        document.querySelectorAll('[data-action="account-manage"]').forEach((btn) => {
+            btn.addEventListener('click', () => {
+                const accountId = btn.getAttribute('data-account-id');
+                alert('TODO: Mở màn hình quản lý tài khoản: ' + accountId);
+            });
+        });
+
+        // Trade filter
+        const filterBtn = document.getElementById('filter-trades-btn');
+        if (filterBtn) {
+            filterBtn.addEventListener('click', () => {
+                alert('TODO: Mở popup hoặc panel lọc lệnh (theo symbol, account, P/L, ...)');
+            });
+        }
+
+        // Close all trades
+        const closeAllBtn = document.getElementById('close-all-trades-btn');
+        if (closeAllBtn) {
+            closeAllBtn.addEventListener('click', async () => {
+                const confirmed = confirm('Bạn có chắc chắn muốn đóng TẤT CẢ lệnh đang mở không?');
+                if (!confirmed) return;
+                // TODO: Gọi API thực tế để close all trades
+                alert('Đã gửi yêu cầu đóng tất cả lệnh (demo).');
+            });
+        }
+
+        // Edit / Close từng lệnh
+        document.querySelectorAll('tr[data-trade-id]').forEach((row) => {
+            const tradeId = row.getAttribute('data-trade-id') || '';
+
+            const editBtn = row.querySelector('[data-action="edit-trade"]');
+            if (editBtn) {
+                editBtn.addEventListener('click', () => {
+                    alert('TODO: Mở form chỉnh sửa lệnh: ' + tradeId);
+                });
+            }
+
+            const closeBtn = row.querySelector('[data-action="close-trade"]');
+            if (closeBtn) {
+                closeBtn.addEventListener('click', async () => {
+                    const confirmed = confirm('Đóng lệnh ' + tradeId + ' ?');
+                    if (!confirmed) return;
+                    // TODO: Gọi API để đóng lệnh cụ thể
+                    alert('Đã gửi yêu cầu đóng lệnh: ' + tradeId + ' (demo).');
+                });
+            }
+        });
+    }
+
+    function setupSidebarToggle() {
+        const btn = document.getElementById('sidebar-toggle-btn');
+        const root = document.getElementById('sidebar-root');
+        const icon = btn ? btn.querySelector('span.material-symbols-outlined') : null;
+        if (!btn || !root) return;
+
+        btn.addEventListener('click', () => {
+            const isVisible = !root.classList.contains('hidden');
+
+            if (isVisible) {
+                // Tắt sidebar
+                window.SIDEBAR_ENABLED = false;
+                initSidebar();
+                if (icon) icon.textContent = 'menu';
+            } else {
+                // Bật sidebar
+                window.SIDEBAR_ENABLED = true;
+                initSidebar();
+                if (supabaseClient) {
+                    loadAccountInfo();
+                    setupAccountMenu();
+                }
+                if (icon) icon.textContent = 'menu_open';
+            }
+        });
+    }
+
+    function setupQuickConfigToggle() {
+        const btn = document.getElementById('quickconfig-toggle-btn');
+        if (!btn) return;
+
+        btn.addEventListener('click', () => {
+            const currentlyEnabled = window.QUICKCONFIG_ENABLED !== false;
+            window.QUICKCONFIG_ENABLED = !currentlyEnabled;
+            initQuickConfig();
+        });
+    }
+
+    // Khởi tạo lần đầu
+    initSidebar();
+    initQuickConfig();
+    setupSidebarToggle();
+    setupQuickConfigToggle();
+    setupTradeAndAccountActions();
+    if (supabaseClient) {
+        loadAccountInfo();
+        setupAccountMenu();
+    }
+</script>
+</body>
+</html>
