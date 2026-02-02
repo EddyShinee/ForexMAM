@@ -14,7 +14,7 @@ function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
-          {/* Mặc định đưa về trang login, sau khi login sẽ chuyển sang dashboard.html */}
+          {/* Mặc định đưa về trang login, sau khi login sẽ chuyển sang /dashboard */}
           <Route path="/" element={<Navigate to="/login" replace />} />
           <Route path="*" element={<NotFoundPage />} />
         </Routes>

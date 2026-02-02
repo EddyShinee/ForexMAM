@@ -1,4 +1,5 @@
 import { useState, useEffect, type FormEvent } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import toast from 'react-hot-toast'
 import { useAuth } from '../contexts/AuthContext'
@@ -6,6 +7,7 @@ import { AuthLayout } from '../components/layout/AuthLayout'
 
 export default function LoginPage() {
   const { t } = useTranslation()
+  const navigate = useNavigate()
   const { user, signIn } = useAuth()
 
   const [email, setEmail] = useState('')
@@ -14,12 +16,12 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false)
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({})
 
-  // Nếu đã đăng nhập sẵn, chuyển thẳng sang dashboard HTML
+  // Đã đăng nhập thì chuyển sang dashboard trong React (không reload, không ra dashboard.html)
   useEffect(() => {
     if (user) {
-      window.location.href = '/dashboard.html'
+      navigate('/dashboard', { replace: true })
     }
-  }, [user])
+  }, [user, navigate])
 
   if (user) return null
 
@@ -43,8 +45,7 @@ export default function LoginPage() {
     if (error) toast.error(t('errors.loginFailed'))
     else {
       toast.success(t('auth.loginSuccess'))
-      // Sau khi đăng nhập thành công, chuyển sang dashboard HTML
-      window.location.href = '/dashboard.html'
+      navigate('/dashboard', { replace: true })
     }
   }
 
