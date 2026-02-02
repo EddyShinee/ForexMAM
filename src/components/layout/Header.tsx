@@ -13,8 +13,8 @@ export function Header() {
   }
 
   return (
-    <header className="bg-surface-dark/50 backdrop-blur-md border-b border-border-dark sticky top-0 z-40">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6">
+    <header className="w-full bg-surface-dark/50 backdrop-blur-md border-b border-border-dark sticky top-0 z-40">
+      <div className="w-full px-4 sm:px-6">
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center gap-3">
             <div className="flex items-center justify-center w-10 h-10 bg-primary rounded-xl shadow-lg shadow-primary/20">
